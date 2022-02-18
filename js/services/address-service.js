@@ -9,3 +9,19 @@ export async function findByCep(cep) {
 
     return address;
 }
+
+export function getErrors(address) {
+    const erros = {};
+
+    if(!address.cep || address.cep == "") {
+        erros.cep = "Campo requerido";
+    }
+
+    if(!address.number || address.number == "") {
+        erros.number = "Campo requerido";
+    }
+
+
+
+    return erros;
+}

@@ -1,5 +1,6 @@
 import Address from "../models/address.js";
 import * as addressService from "../services/address-service.js";
+import * as listController from "./list-controller.js";
 
 function State() {
   this.address = new Address();
@@ -42,39 +43,54 @@ function handleInputumberKeyup(event) {
 }
 
 async function handleInputCepChange(event) {
-  try{
-  const cep = event.target.value;
-  const address = await addressService.findByCep(cep);
-  
-  state.inputCity.value = address.city;
-  state.inputStreet.value = address.street;
-  state.address = address;
+  try {
+    const cep = event.target.value;
+    const address = await addressService.findByCep(cep);
 
-  setFormError("cep", "");
-  state.inputNumber.focus();
- }
- catch(e) {
-   setFormError("cep", "Informe um CEP válido");
-   state.inputStreet.value = "";
-   state.inputCity.value = ""
- }
+    state.inputCity.value = address.city;
+    state.inputStreet.value = address.street;
+    state.address = address;
+
+    setFormError("cep", "");
+    state.inputNumber.focus();
+  } catch (e) {
+    setFormError("cep", "Informe um CEP válido");
+    state.inputStreet.value = "";
+    state.inputCity.value = "";
+  }
 }
 
-async function handleBtnSaveClick(event) {
-  event.preventDefault();  
+ function handleBtnSaveClick(event) {
+  event.preventDefault();
 
-  console.log(state.address);
+  const errors = addressService.getErrors(state.address);
+
+  const keys = Object.keys(errors);
+  
+
+  if (keys.length > 0) {
+
+    keys.forEach(key => {
+      setFormError(key, errors[key]);
+    })
+    //outra maneira de fazer o for
+
+    //for (let i = 0; i < keys.length; i++) {
+      //setFormError(keys[i], errors[keys[i]]);
+   //}
+  } else {
+    listController.addCard(state.address);
+    clearForm();
+  }
 }
 
 function handleInputumberChange(event) {
   if (event.target.value == "") {
-    setFormError("number", "campo requedido");  
+    setFormError("number", "campo requedido");
   } else {
-    setFormError("number", "");    
-  } 
+    setFormError("number", "");
+  }
 }
-
-
 
 function handleBtnClearClick(event) {
   event.preventDefault();
@@ -89,6 +105,8 @@ function clearForm(event) {
 
   setFormError("cep", "");
   setFormError("number", "");
+
+  state.address = new Address();
   state.inputCep.focus();
 }
 
